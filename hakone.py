@@ -1,9 +1,11 @@
 # importing required librarys
 import PySimpleGUI as sg
 import subprocess
-import os
 import copy
 import fenparser
+import showpng
+import io
+
 
 bc_alice_blue = '#f0f8ff'
 light_color_square = '#b0c4de'
@@ -13,9 +15,27 @@ version = "v0.02"
 files = ["a","b","c","d","e","f","g","h"]
 timeout_sec = 6000
 
-pieces_img = {"bk": 'pictures/b_king.png',"wk": "pictures/w_king.png", "bq": "pictures/b_queen.png","wq":"pictures/w_queen.png",
-    "br":"pictures/b_rook.png","wr":"pictures/w_rook.png","bb":"pictures/b_bishop.png","wb":"pictures/w_bishop.png",
-    "bn": "pictures/b_knight.png","wn":"pictures/w_knight.png","bp":"pictures/b_pawn.png","wp":"pictures/w_pawn.png","em":'pictures/empty.png'}
+pieces_ret = showpng.return_pngs()
+png_wk = pieces_ret[0]
+png_wq = pieces_ret[1]
+png_wr = pieces_ret[2]
+png_wb = pieces_ret[3]
+png_wn = pieces_ret[4]
+png_wp = pieces_ret[5]
+png_bk = pieces_ret[6]
+png_bq = pieces_ret[7]
+png_br = pieces_ret[8]
+png_bb = pieces_ret[9]
+png_bn = pieces_ret[10]
+png_bp = pieces_ret[11]
+
+with open("pictures/empty.png",mode="rb") as f:
+    png_emf = f.read()
+    png_em = io.BytesIO(png_emf)
+
+pieces_img = {"bk": png_bk.getvalue(),"wk": png_wk.getvalue(), "bq": png_bq.getvalue(),"wq":png_wq.getvalue(),
+    "br":png_br.getvalue(),"wr":png_wr.getvalue(),"bb":png_bb.getvalue(),"wb":png_wb.getvalue(),
+    "bn": png_bn.getvalue(),"wn":png_wn.getvalue(),"bp":png_bp.getvalue(),"wp":png_wp.getvalue(),"em":png_em.getvalue()}
 
 initial_board = [["br","bn","bb","bq","bk","bb","bn","br"],
     ["bp","bp","bp","bp","bp","bp","bp","bp"],
@@ -26,10 +46,10 @@ initial_board = [["br","bn","bb","bq","bk","bb","bn","br"],
     ["wp","wp","wp","wp","wp","wp","wp","wp"],
     ["wr","wn","wb","wq","wk","wb","wn","wr"]]
 
-image_size_main = (64,64)
-main_image_subsample = int(1024/64)
+image_size_main = (50,50)
+main_image_subsample = 1
 image_size_add = (40,40)
-add_image_subsample = int(1024/40)
+add_image_subsample = 1
 
 def call_engine(values,engine='stelvio'):
     with open("problems.txt","w") as f:
@@ -51,7 +71,7 @@ def create_layout():
     for y in range(8):
         inner = []
         for x in range(8):
-            inner.append(sg.Button(button_text='',image_filename=pieces_img[initial_board[y][x]],image_size=image_size_main,image_subsample=main_image_subsample,
+            inner.append(sg.Button(button_text='',image_data=pieces_img[initial_board[y][x]],image_size=image_size_main,image_subsample=main_image_subsample,
                           border_width=0, button_color= dark_color_square if ((x + y) % 2) else light_color_square,
                           pad=(0, 0), key='-sq{}{}board{}{}-'.format(files[x],8-y,y,x)))
         
@@ -69,43 +89,43 @@ def create_layout():
     inner = []
     
     #Pieces for adding
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["bk"],image_size=image_size_add,image_subsample=add_image_subsample,
+    inner.append(sg.Button(button_text='',image_data=png_bk.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
                           border_width=0, button_color= bc_alice_blue,
                           pad=(0, 0), key='-outside-bk'))
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["bq"],image_size=image_size_add,image_subsample=add_image_subsample,
+    inner.append(sg.Button(button_text='',image_data=png_bq.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
                           border_width=0, button_color= bc_alice_blue,
                           pad=(0, 0), key='-outside-bq'))
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["br"],image_size=image_size_add,image_subsample=add_image_subsample,
+    inner.append(sg.Button(button_text='',image_data=png_br.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
                           border_width=0, button_color= bc_alice_blue,
                           pad=(0, 0), key='-outside-br'))
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["bb"],image_size=image_size_add,image_subsample=add_image_subsample,
+    inner.append(sg.Button(button_text='',image_data=png_bb.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
                           border_width=0, button_color= bc_alice_blue,
                           pad=(0, 0), key='-outside-bb'))
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["bn"],image_size=image_size_add,image_subsample=add_image_subsample,
+    inner.append(sg.Button(button_text='',image_data=png_bn.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
                           border_width=0, button_color= bc_alice_blue,
                           pad=(0, 0), key='-outside-bn'))
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["bp"],image_size=image_size_add,image_subsample=add_image_subsample,
+    inner.append(sg.Button(button_text='',image_data=png_bp.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
                           border_width=0, button_color= bc_alice_blue,
                           pad=(0, 0), key='-outside-bp'))
     layout.append(inner.copy())
 
     inner = []
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["wk"],image_size=image_size_add,image_subsample=add_image_subsample,
+    inner.append(sg.Button(button_text='',image_data=png_wk.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
                           border_width=0, button_color= bc_alice_blue,
                           pad=(0, 0), key='-outside-wk'))
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["wq"],image_size=image_size_add,image_subsample=add_image_subsample,
+    inner.append(sg.Button(button_text='',image_data=png_wq.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
                           border_width=0, button_color= bc_alice_blue,
                           pad=(0, 0), key='-outside-wq'))
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["wr"],image_size=image_size_add,image_subsample=add_image_subsample,
-                          border_width=0, button_color= bc_alice_blue,
-                          pad=(0, 0), key='-outside-wr'))
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["wb"],image_size=image_size_add,image_subsample=add_image_subsample,
+    inner.append(sg.Button(button_text='',image_data=png_wr.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
+                           border_width=0, button_color= bc_alice_blue,
+                           pad=(0, 0), key='-outside-wr'))
+    inner.append(sg.Button(button_text='',image_data=png_wb.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
                           border_width=0, button_color= bc_alice_blue,
                           pad=(0, 0), key='-outside-wb'))
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["wn"],image_size=image_size_add,image_subsample=add_image_subsample,
+    inner.append(sg.Button(button_text='',image_data=png_wn.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
                           border_width=0, button_color= bc_alice_blue,
                           pad=(0, 0), key='-outside-wn'))
-    inner.append(sg.Button(button_text='',image_filename=pieces_img["wp"],image_size=image_size_add,image_subsample=add_image_subsample,
+    inner.append(sg.Button(button_text='',image_data=png_wp.getvalue(),image_size=image_size_add,image_subsample=add_image_subsample,
                           border_width=0, button_color= bc_alice_blue,
                           pad=(0, 0), key='-outside-wp'))
 
@@ -154,7 +174,7 @@ def main():
             move_board = copy.deepcopy(initial_board)
             for y in range(8):
                 for x in range(8):
-                    window['-sq{}{}board{}{}-'.format(files[x],8-y,y,x)].update(image_filename=pieces_img[initial_board[y][x]],image_size=image_size_main,image_subsample=main_image_subsample)
+                    window['-sq{}{}board{}{}-'.format(files[x],8-y,y,x)].update(image_data=pieces_img[initial_board[y][x]],image_size=image_size_main,image_subsample=main_image_subsample)
             forsyth = fenparser.read_fen_from_current_position(move_board)
             window["forsyth"].update(forsyth)
             move_from_set = False
@@ -181,7 +201,7 @@ def main():
                 from_outside = False
                 for y in range(8):
                     for x in range(8):
-                        window['-sq{}{}board{}{}-'.format(files[x],8-y,y,x)].update(image_filename=pieces_img[move_board[y][x]],image_size=image_size_main,image_subsample=main_image_subsample)
+                        window['-sq{}{}board{}{}-'.format(files[x],8-y,y,x)].update(image_data=pieces_img[move_board[y][x]],image_size=image_size_main,image_subsample=main_image_subsample)
             except:
                 sg.PopupOK("invalid forsyth",keep_on_top=True)
                 window["forsyth"].update('')
@@ -235,8 +255,8 @@ def main():
                         tmp = move_board[int(move_from_index[0])][int(move_from_index[1])]
                         move_board[int(move_from_index[0])][int(move_from_index[1])] = "em"
                         move_board[int(move_to_index[0])][int(move_to_index[1])] = tmp
-                        window[move_from_square].update(image_filename=pieces_img[move_board[int(move_from_index[0])][int(move_from_index[1])]],image_size=image_size_main,image_subsample=main_image_subsample,button_color=dark_color_square if (int(move_from_index[0])+int(move_from_index[1])) % 2 else light_color_square)
-                        window[move_to_square].update(image_filename=pieces_img[move_board[int(move_to_index[0])][int(move_to_index[1])]],image_size=image_size_main,image_subsample=main_image_subsample)
+                        window[move_from_square].update(image_data=pieces_img[move_board[int(move_from_index[0])][int(move_from_index[1])]],image_size=image_size_main,image_subsample=main_image_subsample,button_color=dark_color_square if (int(move_from_index[0])+int(move_from_index[1])) % 2 else light_color_square)
+                        window[move_to_square].update(image_data=pieces_img[move_board[int(move_to_index[0])][int(move_to_index[1])]],image_size=image_size_main,image_subsample=main_image_subsample)
 
                         #adding 0.5 to the plycount
                         if not move_from_square == move_to_square:
@@ -248,7 +268,7 @@ def main():
                 else: #"adding" mode
 
                     move_board[int(move_to_index[0])][int(move_to_index[1])] = add_piece
-                    window[move_to_square].update(image_filename=pieces_img[move_board[int(move_to_index[0])][int(move_to_index[1])]],image_size=image_size_main,image_subsample=main_image_subsample)
+                    window[move_to_square].update(image_data=pieces_img[move_board[int(move_to_index[0])][int(move_to_index[1])]],image_size=image_size_main,image_subsample=main_image_subsample)
                     window[move_from_square].update(button_color=bc_alice_blue)
 
                 #FEN transform

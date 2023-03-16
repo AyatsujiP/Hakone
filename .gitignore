@@ -8,3 +8,4 @@ engine/bin/slf4j-log4j12-1.7.5.jar
 engine/bin/stelvio11.jar
 problems_out.txt
 problems.txt
+__pycache__/showpng.cpython-39.pyc
